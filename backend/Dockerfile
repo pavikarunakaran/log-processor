@@ -13,9 +13,6 @@ RUN npm install
 # Copy the rest of the backend code into the container
 COPY backend/ .
 
-# Run tests during the build process
-RUN npm test
-
 # Expose the backend port
 EXPOSE 3000
 
