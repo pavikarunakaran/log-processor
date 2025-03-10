@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+  websocket:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: node websocket.js
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    environment:
+      - WEBSOCKET_HOST=0.0.0.0
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - KEYWORDS=${KEYWORDS}
+      - WEBSOCKET_URL=ws://websocket:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis
+      - websocket
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+    - NEXT_PUBLIC_SUPABASE_URL=${SUPABASE_URL}
+    - NEXT_PUBLIC_SUPABASE_KEY=${SUPABASE_KEY}
+    ports:
+      - "3001:3000"
+    depends_on:
+      - backend
